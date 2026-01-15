@@ -56,12 +56,14 @@ const sendCode = () => {
   disabled.value = true;
   // 按钮倒计时
   let i = 60;
-  this.codeBtnMsg = (i--) + '秒后可重发'
-  let taskId = setInterval(() => codeBtnMsg = (i--) + '秒后可重发', 1000);
+  codeBtnMsg.value = `${i--}秒后可重发`;
+  const taskId = setInterval(() => {
+    codeBtnMsg.value = `${i--}秒后可重发`;
+  }, 1000);
   setTimeout(() => {
-    disabled = false;
+    disabled.value = false;
     clearInterval(taskId);
-    codeBtnMsg = "发送验证码";
+    codeBtnMsg.value = "发送验证码";
   }, 59000)
 }
 const disabled = ref(false);
