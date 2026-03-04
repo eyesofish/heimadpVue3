@@ -1,5 +1,4 @@
 import http from './http';
-import { getLocalOrders } from '../stores/order';
 
 // user
 export const sendUserCode = (phone) => http.post('/user/code', null, { params: { phone } });
@@ -42,9 +41,7 @@ export const getVoucherList = (shopId) => http.get(`/voucher/list/${shopId}`);
 // voucher-order
 export const createOrder = (voucherId) => http.post(`/voucher-order/seckill/${voucherId}`);
 export const getOrderDetail = (orderId) => http.get(`/voucher-order/${orderId}`);
-
-// no backend HTTP API for order list exists yet, so frontend reads local history
-export const getOrderList = async () => getLocalOrders();
+export const getOrderList = (params) => http.get('/voucher-order/of/me', { params });
 
 // upload
 export const uploadBlogImage = (file) => {
