@@ -79,7 +79,7 @@ const goShopDetail = () => {
         Request accepted, orderId: <strong>{{ orderId }}</strong>
       </div>
       <div class="muted">
-        The backend currently has no HTTP API to query final order status by orderId.
+        You can open the order list page to query backend status by orderId.
       </div>
     </div>
 

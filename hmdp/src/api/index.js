@@ -41,6 +41,7 @@ export const getVoucherList = (shopId) => http.get(`/voucher/list/${shopId}`);
 
 // voucher-order
 export const createOrder = (voucherId) => http.post(`/voucher-order/seckill/${voucherId}`);
+export const getOrderDetail = (orderId) => http.get(`/voucher-order/${orderId}`);
 
 // no backend HTTP API for order list exists yet, so frontend reads local history
 export const getOrderList = async () => getLocalOrders();

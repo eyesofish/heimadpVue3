@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { getOrderList } from '../api';
+import { getOrderDetail, getOrderList } from '../api';
 import { clearLocalOrders } from '../stores/order';
 import { authState, refreshUser } from '../stores/user';
 
@@ -27,7 +27,30 @@ const loadOrders = async () => {
   loading.value = true;
   error.value = '';
   try {
-    orders.value = await getOrderList();
+    const localOrders = await getOrderList();
+    if (!Array.isArray(localOrders) || localOrders.length === 0) {
+      orders.value = [];
+      return;
+    }
+    const merged = await Promise.all(
+      localOrders.map(async (order) => {
+        try {
+          const remote = await getOrderDetail(order.orderId);
+          return {
+            ...order,
+            backend: remote,
+            backendError: '',
+          };
+        } catch (e) {
+          return {
+            ...order,
+            backend: null,
+            backendError: e.message || 'Failed to fetch backend status',
+          };
+        }
+      }),
+    );
+    orders.value = merged;
   } catch (e) {
     error.value = e.message || 'Failed to load order list';
   } finally {
@@ -65,7 +88,7 @@ onMounted(async () => {
         User: {{ currentUser?.nickName || 'Unknown' }} (id: {{ currentUser?.id ?? '-' }})
       </div>
       <div class="muted">
-        Order list is sourced from local history because backend does not provide `GET /order` API.
+        List source is local order history; each order will call backend `GET /voucher-order/{orderId}` for latest status.
       </div>
       <div class="grid cols-2">
         <button type="button" :disabled="loading" @click="loadOrders">Refresh Orders</button>
@@ -86,6 +109,13 @@ onMounted(async () => {
           <div><strong>title:</strong> {{ order.title || '-' }}</div>
           <div><strong>status:</strong> {{ order.status || '-' }}</div>
           <div><strong>createdAt:</strong> {{ formatDate(order.createdAt) }}</div>
+          <div><strong>backendStatus:</strong> {{ order.backend?.statusDesc || '-' }}</div>
+          <div><strong>backendCode:</strong> {{ order.backend?.status ?? '-' }}</div>
+          <div><strong>dbExists:</strong> {{ order.backend?.dbExists ?? '-' }}</div>
+          <div><strong>processing:</strong> {{ order.backend?.processing ?? '-' }}</div>
+          <div><strong>backendMessage:</strong> {{ order.backend?.message || '-' }}</div>
+          <div><strong>backendUpdate:</strong> {{ formatDate(order.backend?.updateTime) }}</div>
+          <div v-if="order.backendError" class="error">{{ order.backendError }}</div>
           <div class="muted">{{ order.note || '' }}</div>
         </article>
       </template>
