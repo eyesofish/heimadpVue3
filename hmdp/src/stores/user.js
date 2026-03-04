@@ -1,16 +1,9 @@
 import { reactive } from 'vue';
+import { clearStoredToken, getStoredToken, setStoredToken } from '../api/auth';
 import { getCurrentUser, logoutUser } from '../api';
 
-const TOKEN_STORAGE_KEY = 'jwt_token';
 const USER_STORAGE_KEY = 'dev_user_snapshot';
 const MOCK_STORAGE_KEY = 'mock_user_enabled';
-
-const normalizeToken = (token) => {
-  if (!token) {
-    return '';
-  }
-  return token.startsWith('Bearer ') ? token.slice(7).trim() : token.trim();
-};
 
 const readUserSnapshot = () => {
   const raw = localStorage.getItem(USER_STORAGE_KEY);
@@ -31,19 +24,13 @@ export const authState = reactive({
 });
 
 export const initUserState = () => {
-  authState.token = normalizeToken(localStorage.getItem(TOKEN_STORAGE_KEY));
+  authState.token = getStoredToken();
   authState.user = readUserSnapshot();
   authState.initialized = true;
 };
 
 export const setAuthToken = (token) => {
-  const normalized = normalizeToken(token);
-  authState.token = normalized;
-  if (normalized) {
-    localStorage.setItem(TOKEN_STORAGE_KEY, normalized);
-  } else {
-    localStorage.removeItem(TOKEN_STORAGE_KEY);
-  }
+  authState.token = setStoredToken(token);
 };
 
 export const setAuthUser = (user) => {
@@ -56,7 +43,8 @@ export const setAuthUser = (user) => {
 };
 
 export const clearAuth = () => {
-  setAuthToken('');
+  authState.token = '';
+  clearStoredToken();
   setAuthUser(null);
   localStorage.removeItem(MOCK_STORAGE_KEY);
 };

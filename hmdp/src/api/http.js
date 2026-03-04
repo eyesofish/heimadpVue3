@@ -1,14 +1,7 @@
 import axios from 'axios';
+import { clearStoredToken, devLogin, getStoredToken, setStoredToken } from './auth';
 
-const TOKEN_STORAGE_KEY = 'jwt_token';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081';
-
-const normalizeToken = (token) => {
-  if (!token) {
-    return '';
-  }
-  return token.startsWith('Bearer ') ? token.slice(7).trim() : token.trim();
-};
 
 const http = axios.create({
   baseURL: API_BASE_URL,
@@ -18,9 +11,27 @@ const http = axios.create({
   },
 });
 
+let refreshPromise = null;
+
+const refreshDevToken = async () => {
+  if (!refreshPromise) {
+    refreshPromise = devLogin()
+      .then((token) => {
+        const savedToken = setStoredToken(token);
+        if (!savedToken) {
+          throw new Error('Dev login returned empty token');
+        }
+        return savedToken;
+      })
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+  return refreshPromise;
+};
+
 http.interceptors.request.use((config) => {
-  const rawToken = localStorage.getItem(TOKEN_STORAGE_KEY);
-  const token = normalizeToken(rawToken);
+  const token = getStoredToken();
   if (token) {
     config.headers = config.headers || {};
     config.headers.Authorization = `Bearer ${token}`;
@@ -43,14 +54,26 @@ http.interceptors.response.use(
     }
     return payload;
   },
-  (error) => {
-    if (error?.response?.status === 401) {
-      localStorage.removeItem(TOKEN_STORAGE_KEY);
-      if (window.location.hash !== '#/login') {
-        window.location.hash = '/login';
+  async (error) => {
+    const status = error?.response?.status;
+    const originalRequest = error?.config;
+
+    if (status === 401 && originalRequest && !originalRequest.__devAuthRetried) {
+      originalRequest.__devAuthRetried = true;
+      try {
+        const token = await refreshDevToken();
+        originalRequest.headers = originalRequest.headers || {};
+        originalRequest.headers.Authorization = `Bearer ${token}`;
+        return http(originalRequest);
+      } catch (refreshError) {
+        clearStoredToken();
+        if (refreshError instanceof Error) {
+          return Promise.reject(refreshError);
+        }
+        return Promise.reject(new Error('Unauthorized'));
       }
-      return Promise.reject(new Error('Unauthorized'));
     }
+
     const message =
       error?.response?.data?.errorMsg ||
       error?.response?.data?.message ||
