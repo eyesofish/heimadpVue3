@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { clearStoredToken, devLogin, getStoredToken, setStoredToken } from './auth';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
 const http = axios.create({
   baseURL: API_BASE_URL,

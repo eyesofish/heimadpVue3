@@ -30,6 +30,18 @@ const imageList = computed(() => {
     .filter(Boolean);
 });
 
+const normalizeVoucherText = (value, fallback = '-') => {
+  const text = value == null ? '' : String(value).trim();
+  if (!text) {
+    return fallback;
+  }
+  // Some bad records are persisted as "????", hide them with a readable fallback.
+  if (/^\?+$/.test(text)) {
+    return fallback;
+  }
+  return text;
+};
+
 const isVoucherExpired = (voucher) => {
   if (!voucher?.endTime) {
     return false;
@@ -118,8 +130,8 @@ onMounted(loadDetail);
       <div v-if="vouchers.length === 0" class="muted">No voucher data.</div>
       <article v-for="voucher in vouchers" :key="voucher.id" class="voucher-item">
         <div class="stack">
-          <strong>{{ voucher.title }}</strong>
-          <span class="muted">{{ voucher.subTitle || '-' }}</span>
+          <strong>{{ normalizeVoucherText(voucher.title, `Voucher #${voucher.id}`) }}</strong>
+          <span class="muted">{{ normalizeVoucherText(voucher.subTitle, '-') }}</span>
           <span class="muted">Stock: {{ voucher.stock ?? '-' }}</span>
           <span class="muted">Type: {{ voucher.type === 1 ? 'Seckill' : 'Normal' }}</span>
           <span class="muted">End Time: {{ voucher.endTime || '-' }}</span>
