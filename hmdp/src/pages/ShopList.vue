@@ -117,6 +117,14 @@ const openShop = (shopId) => {
   router.push(`/shops/${shopId}`);
 };
 
+const openCreateShop = () => {
+  router.push('/shop/edit');
+};
+
+const openEditShop = (shopId) => {
+  router.push(`/shop/edit/${shopId}`);
+};
+
 onMounted(async () => {
   try {
     await loadShopTypes();
@@ -130,7 +138,10 @@ onMounted(async () => {
 <template>
   <section class="stack">
     <div class="card stack">
-      <h2>Shop List</h2>
+      <div class="list-header">
+        <h2>Shop List</h2>
+        <button type="button" @click="openCreateShop">Create Shop</button>
+      </div>
       <p class="muted">Browse shops by type or search by name.</p>
 
       <div class="grid cols-2">
@@ -181,7 +192,10 @@ onMounted(async () => {
             <div class="muted">Area: {{ shop.area || '-' }}</div>
             <div class="muted">Address: {{ shop.address || '-' }}</div>
             <div class="muted">Distance: {{ distanceText(shop) || '-' }}</div>
-            <button type="button" @click="openShop(shop.id)">View Detail</button>
+            <div class="action-row">
+              <button type="button" @click="openShop(shop.id)">View Detail</button>
+              <button type="button" @click="openEditShop(shop.id)">Edit</button>
+            </div>
           </div>
         </article>
       </template>
@@ -190,6 +204,13 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .shop-item {
   display: grid;
   grid-template-columns: 180px minmax(0, 1fr);
@@ -227,7 +248,17 @@ onMounted(async () => {
   gap: 6px;
 }
 
+.action-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 @media (max-width: 768px) {
+  .list-header {
+    flex-wrap: wrap;
+  }
+
   .shop-item {
     grid-template-columns: 1fr;
   }

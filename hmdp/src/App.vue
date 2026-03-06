@@ -20,6 +20,7 @@ const onLogout = async () => {
       <div class="brand">Dianping Dev Frontend</div>
       <nav class="app-nav">
         <RouterLink to="/shops">Shops</RouterLink>
+        <RouterLink to="/shop/edit">New Shop</RouterLink>
         <RouterLink to="/orders">Orders</RouterLink>
         <RouterLink to="/login">Login</RouterLink>
       </nav>

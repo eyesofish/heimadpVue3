@@ -2,6 +2,7 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 import { authState } from '../stores/user';
 import ShopList from '../pages/ShopList.vue';
 import ShopDetail from '../pages/ShopDetail.vue';
+import ShopEdit from '../pages/ShopEdit.vue';
 import CreateOrder from '../pages/CreateOrder.vue';
 import OrderList from '../pages/OrderList.vue';
 import Login from '../pages/Login.vue';
@@ -22,6 +23,19 @@ const router = createRouter({
       path: '/shops/:id',
       name: 'shop-detail',
       component: ShopDetail,
+      props: true,
+    },
+    {
+      path: '/shop/edit',
+      name: 'shop-create',
+      component: ShopEdit,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/shop/edit/:id',
+      name: 'shop-edit',
+      component: ShopEdit,
+      meta: { requiresAuth: true },
       props: true,
     },
     {

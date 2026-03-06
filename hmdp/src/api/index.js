@@ -11,7 +11,8 @@ export const userSign = () => http.post('/user/sign');
 export const getSignCount = () => http.get('/user/sign/count');
 
 // shop / shop-type
-export const getShopDetail = (id) => http.get(`/shop/${id}`);
+export const queryShopById = (id) => http.get(`/shop/${id}`);
+export const getShopDetail = queryShopById;
 export const createShop = (data) => http.post('/shop', data);
 export const updateShop = (data) => http.put('/shop', data);
 export const getShopList = (params) => http.get('/shop/of/type', { params });
