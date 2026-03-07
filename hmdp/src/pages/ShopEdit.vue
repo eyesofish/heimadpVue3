@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { createShop, getShopTypeList, queryShopById, updateShop } from '../api';
 
@@ -334,12 +334,13 @@ onMounted(async () => {
   try {
     await loadShopTypes();
     await loadShopDetail();
-    await initMap();
   } catch (e) {
     error.value = e.message || 'Failed to load shop edit page';
   } finally {
     loading.value = false;
   }
+  await nextTick();
+  await initMap();
 });
 
 onUnmounted(() => {
